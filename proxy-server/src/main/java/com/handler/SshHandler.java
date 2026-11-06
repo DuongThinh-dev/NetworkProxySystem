@@ -1,4 +1,4 @@
-package main.java.com.handler;
+package com.handler;
 
 public class SshHandler {
     

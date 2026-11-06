@@ -1,4 +1,4 @@
-package main.java.com.networkproxy;
+package com.networkproxy;
 
 public class ProxyApplication {
     

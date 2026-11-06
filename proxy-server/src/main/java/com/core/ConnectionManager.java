@@ -1,4 +1,4 @@
-package main.java.com.core;
+package com.core;
 
 public class ConnectionManager {
     

@@ -1,4 +1,4 @@
-package main.java.com.logging;
+package com.logging;
 
 public class ConnectionLogger {
     

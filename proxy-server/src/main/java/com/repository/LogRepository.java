@@ -1,4 +1,4 @@
-package main.java.com.repository;
+package com.repository;
 
 public class LogRepository {
     

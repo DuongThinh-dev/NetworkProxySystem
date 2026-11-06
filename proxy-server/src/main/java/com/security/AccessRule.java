@@ -1,4 +1,4 @@
-package main.java.com.security;
+package com.security;
 
 public class AccessRule {
     
