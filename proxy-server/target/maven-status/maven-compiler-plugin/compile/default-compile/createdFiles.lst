@@ -1,5 +1,7 @@
 com\networkproxy\config\ProxyConfig.class
 com\networkproxy\logging\ConnectionLogger.class
+com\networkproxy\handler\HandlerDispatcher.class
+com\networkproxy\handler\ProtocolHandler.class
 com\networkproxy\network\DataRelay.class
 com\networkproxy\core\ConnectionManager.class
 com\networkproxy\core\ProxyServer.class
@@ -15,3 +17,4 @@ com\networkproxy\network\SocketManager.class
 com\networkproxy\repository\LogRepository.class
 com\networkproxy\security\AccessControlService.class
 com\networkproxy\repository\RuleRepository.class
+com\networkproxy\handler\HandlerDispatcher$Protocol.class
