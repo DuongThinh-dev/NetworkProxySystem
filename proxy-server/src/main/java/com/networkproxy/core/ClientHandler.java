@@ -1,9 +1,9 @@
 package com.networkproxy.core;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import com.networkproxy.handler.HttpHandler;
 
 public class ClientHandler implements Runnable {
 
@@ -34,23 +34,7 @@ public class ClientHandler implements Runnable {
 
             clientSocket.setSoTimeout(clientTimeout);
 
-            InputStream inputStream =
-                    clientSocket.getInputStream();
-
-            byte[] buffer = new byte[4096];
-
-            int bytesRead;
-
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-
-                System.out.println(
-                        "Nhan " + bytesRead +
-                        " bytes tu Client: " + clientAddress
-                );
-
-                // Giai doan 2 chi kiem tra ket noi.
-                // Chua xu ly HTTP, HTTPS hoac SSH.
-            }
+            new HttpHandler().handle(clientSocket);
 
         } catch (SocketTimeoutException e) {
 
