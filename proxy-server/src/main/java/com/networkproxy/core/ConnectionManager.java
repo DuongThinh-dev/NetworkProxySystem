@@ -35,25 +35,13 @@ public class ConnectionManager {
 
         try {
 
-            executorService.execute(() -> {
-
-                try {
-
-                    ClientHandler handler =
-                            new ClientHandler(
-                                    clientSocket,
-                                    this,
-                                    clientTimeout
-                            );
-
-                    handler.run();
-
-                } finally {
-
-                    removeClient(clientSocket);
-
-                }
-            });
+            executorService.execute(
+                    new ClientHandler(
+                            clientSocket,
+                            this,
+                            clientTimeout
+                    )
+            );
 
         } catch (RejectedExecutionException e) {
 

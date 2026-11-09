@@ -21,6 +21,8 @@
     <!-- Cấu hình Maven -->
     <build>
         <plugins>
+
+            <!-- Biên dịch Java -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -29,6 +31,17 @@
                     <release>17</release>
                 </configuration>
             </plugin>
+
+            <!-- Chạy ứng dụng Java -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.4</version>
+                <configuration>
+                    <mainClass>com.networkproxy.ProxyApplication</mainClass>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
