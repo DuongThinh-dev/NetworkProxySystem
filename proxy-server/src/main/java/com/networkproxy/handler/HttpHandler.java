@@ -19,6 +19,12 @@ public class HttpHandler implements ProtocolHandler {
     public void handle(Socket clientSocket) throws IOException {
         BufferedInputStream clientInput =
                 new BufferedInputStream(clientSocket.getInputStream());
+        handle(clientSocket, clientInput);
+    }
+
+    @Override
+    public void handle(Socket clientSocket, BufferedInputStream clientInput)
+            throws IOException {
         OutputStream clientOutput = clientSocket.getOutputStream();
 
         byte[] headerBytes = readHeaders(clientInput);

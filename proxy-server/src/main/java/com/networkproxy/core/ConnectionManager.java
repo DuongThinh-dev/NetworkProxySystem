@@ -18,9 +18,11 @@ public class ConnectionManager {
             ConcurrentHashMap.newKeySet();
 
     private final SocketManager socketManager;
+    private final ProxyConfig config;
 
     public ConnectionManager(ProxyConfig config) {
 
+        this.config = config;
         this.executorService = Executors.newFixedThreadPool(
                 config.getMaxThreads()
         );
@@ -39,7 +41,8 @@ public class ConnectionManager {
                     new ClientHandler(
                             clientSocket,
                             this,
-                            clientTimeout
+                            clientTimeout,
+                            config
                     )
             );
 

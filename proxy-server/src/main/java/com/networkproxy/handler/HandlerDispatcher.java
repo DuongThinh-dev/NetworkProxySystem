@@ -1,6 +1,7 @@
 package com.networkproxy.handler;
 
 import java.io.IOException;
+import java.io.BufferedInputStream;
 import java.net.Socket;
 import java.util.EnumMap;
 import java.util.Map;
@@ -39,5 +40,19 @@ public class HandlerDispatcher {
         }
 
         handler.handle(clientSocket);
+    }
+
+    public void dispatch(
+            Protocol protocol,
+            Socket clientSocket,
+            BufferedInputStream input
+    ) throws IOException {
+        ProtocolHandler handler = handlers.get(protocol);
+        if (handler == null) {
+            throw new IOException(
+                    "Chua dang ky Handler cho giao thuc: " + protocol
+            );
+        }
+        handler.handle(clientSocket, input);
     }
 }

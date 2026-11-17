@@ -1,0 +1,16 @@
+# Yêu cầu môi trường cho NetworkProxySystem
+#
+# Đây là dự án Java/Maven, không phải dự án Python. Maven sẽ tự tải các
+# thư viện được khai báo trong proxy-server/pom.xml.
+
+Java Development Kit (JDK) >= 17
+Apache Maven >= 3.9
+
+# Phụ thuộc Maven của proxy-server (được tải tự động):
+org.apache.sshd:sshd-core:2.12.1
+org.apache.sshd:sshd-common:2.12.1
+org.junit.jupiter:junit-jupiter:5.11.0 (test)
+
+# Tùy chọn cho chức năng SSH:
+# - Tệp ~/.ssh/known_hosts hợp lệ
+# - Khóa riêng SSH hoặc mật khẩu được cung cấp lúc chạy
