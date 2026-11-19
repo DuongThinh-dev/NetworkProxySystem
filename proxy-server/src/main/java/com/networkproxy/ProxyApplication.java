@@ -3,21 +3,43 @@ package com.networkproxy;
 import com.networkproxy.config.ProxyConfig;
 import com.networkproxy.core.ConnectionManager;
 import com.networkproxy.core.ProxyServer;
+import com.networkproxy.config.DatabaseConfig;
+import com.networkproxy.logging.ConnectionLogger;
+import com.networkproxy.repository.LogRepository;
+import com.networkproxy.repository.RuleRepository;
+import com.networkproxy.security.AccessControlService;
+import com.networkproxy.security.RuleManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Properties;
 
 public class ProxyApplication {
 
     public static void main(String[] args) {
 
-        ProxyConfig config = loadConfig();
+        Properties properties = loadProperties();
+        ProxyConfig config = loadConfig(properties);
+        DatabaseConfig databaseConfig = DatabaseConfig.from(properties);
 
-        // 2. Khởi tạo ConnectionManager
+        AccessControlService accessControlService;
+        ConnectionLogger connectionLogger;
+        try {
+            RuleManager ruleManager = databaseConfig.enabled()
+                    ? new RuleManager(new RuleRepository(databaseConfig))
+                    : new RuleManager(List::of);
+            accessControlService = new AccessControlService(ruleManager);
+            connectionLogger = new ConnectionLogger(
+                    new LogRepository(databaseConfig));
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "Khong the khoi tao Access Control va Logging", e);
+        }
+
         ConnectionManager connectionManager =
-                new ConnectionManager(config);
+                new ConnectionManager(config, accessControlService, connectionLogger);
 
         // 3. Khởi tạo ProxyServer
         ProxyServer proxyServer =
@@ -57,7 +79,7 @@ public class ProxyApplication {
         }
     }
 
-    private static ProxyConfig loadConfig() {
+    private static Properties loadProperties() {
         Properties properties = new Properties();
         try (InputStream input = ProxyApplication.class
                 .getResourceAsStream("/application.properties")) {
@@ -68,7 +90,10 @@ public class ProxyApplication {
         } catch (IOException e) {
             throw new IllegalStateException("Unable to load proxy configuration", e);
         }
+        return properties;
+    }
 
+    private static ProxyConfig loadConfig(Properties properties) {
         return new ProxyConfig(
                 integer(properties, "proxy.port", 8080),
                 integer(properties, "proxy.max-threads", 50),

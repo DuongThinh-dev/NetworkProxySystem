@@ -1,5 +1,10 @@
 package com.networkproxy.handler;
 
+import com.networkproxy.logging.ConnectionLog;
+import com.networkproxy.logging.ConnectionLogger;
+import com.networkproxy.security.AccessControlService;
+import com.networkproxy.security.AccessRule;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +19,18 @@ public class HttpHandler implements ProtocolHandler {
 
     private static final int MAX_HEADER_SIZE = 64 * 1024;
     private static final int CONNECT_TIMEOUT_MILLIS = 10_000;
+    private final AccessControlService accessControlService;
+    private final ConnectionLogger connectionLogger;
+
+    public HttpHandler() {
+        this(null, null);
+    }
+
+    public HttpHandler(AccessControlService accessControlService,
+                       ConnectionLogger connectionLogger) {
+        this.accessControlService = accessControlService;
+        this.connectionLogger = connectionLogger;
+    }
 
     @Override
     public void handle(Socket clientSocket) throws IOException {
@@ -45,7 +62,6 @@ public class HttpHandler implements ProtocolHandler {
             return;
         }
 
-        String method = requestLine[0];
         URI target = resolveTarget(requestLine[1], lines);
         if (target == null || target.getHost() == null
                 || !"http".equalsIgnoreCase(target.getScheme())) {
@@ -61,6 +77,52 @@ public class HttpHandler implements ProtocolHandler {
         }
         if (hasChunkedEncoding(lines)) {
             sendError(clientOutput, 501, "Chunked requests are not supported");
+            return;
+        }
+
+        if (accessControlService != null) {
+            AccessControlService.AccessRequest accessRequest =
+                    new AccessControlService.AccessRequest(
+                            clientSocket.getInetAddress().getHostAddress(),
+                            target.getHost(),
+                            isIpLiteral(target.getHost()) ? target.getHost() : null,
+                            port,
+                            "HTTP");
+            AccessControlService.AccessDecision decision =
+                    accessControlService.decide(accessRequest);
+            if (decision.action() == AccessRule.Action.BLOCK) {
+                if (connectionLogger != null) {
+                    connectionLogger.log(
+                            accessRequest,
+                            decision,
+                            ConnectionLog.ExecutionStatus.BLOCKED,
+                            null);
+                }
+                sendError(clientOutput, 403, "Forbidden");
+                return;
+            }
+
+            try {
+                handleAllowedRequest(
+                        clientSocket,
+                        clientInput,
+                        clientOutput,
+                        target,
+                        port,
+                        lines,
+                        contentLength,
+                        accessRequest,
+                        decision);
+            } catch (IOException e) {
+                if (connectionLogger != null) {
+                    connectionLogger.log(
+                            accessRequest,
+                            decision,
+                            ConnectionLog.ExecutionStatus.ERROR,
+                            "HTTP upstream connection failed");
+                }
+                sendError(clientOutput, 502, "Bad Gateway");
+            }
             return;
         }
 
@@ -82,6 +144,75 @@ public class HttpHandler implements ProtocolHandler {
             relayResponse(remoteSocket, clientOutput);
         } catch (IOException e) {
             sendError(clientOutput, 502, "Bad Gateway");
+        }
+    }
+
+    private void handleAllowedRequest(
+            Socket clientSocket,
+            BufferedInputStream clientInput,
+            OutputStream clientOutput,
+            URI target,
+            int port,
+            String[] lines,
+            long contentLength,
+            AccessControlService.AccessRequest accessRequest,
+            AccessControlService.AccessDecision decision
+    ) throws IOException {
+        byte[] body = clientInput.readNBytes((int) contentLength);
+        if (body.length != contentLength) {
+            sendError(clientOutput, 400, "Incomplete request body");
+            return;
+        }
+
+        try (Socket remoteSocket = new Socket()) {
+            remoteSocket.connect(
+                    new InetSocketAddress(target.getHost(), port),
+                    CONNECT_TIMEOUT_MILLIS);
+            remoteSocket.setSoTimeout(clientSocket.getSoTimeout());
+            if (connectionLogger != null) {
+                connectionLogger.log(
+                        accessRequest,
+                        decision,
+                        ConnectionLog.ExecutionStatus.CONNECTED,
+                        null);
+            }
+
+            OutputStream remoteOutput = remoteSocket.getOutputStream();
+            writeRequest(remoteOutput, lines, target, body);
+            relayResponse(remoteSocket, clientOutput);
+        } catch (IOException e) {
+        if (connectionLogger != null) {
+            connectionLogger.log(
+                    accessRequest,
+                    decision,
+                    ConnectionLog.ExecutionStatus.ERROR,
+                    "HTTP upstream connection failed");
+        }
+            sendError(clientOutput, 502, "Bad Gateway");
+        }
+    }
+
+    private boolean isIpLiteral(String host) {
+        if (host == null) {
+            return false;
+        }
+        if (host.indexOf(':') >= 0) {
+            return true;
+        }
+        String[] parts = host.split("\\.", -1);
+        if (parts.length != 4) {
+            return false;
+        }
+        try {
+            for (String part : parts) {
+                int value = Integer.parseInt(part);
+                if (value < 0 || value > 255) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

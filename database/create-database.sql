@@ -1,0 +1,5 @@
+IF DB_ID(N'NetworkProxyDB') IS NULL
+BEGIN
+    EXEC(N'CREATE DATABASE [NetworkProxyDB]');
+END;
+GO

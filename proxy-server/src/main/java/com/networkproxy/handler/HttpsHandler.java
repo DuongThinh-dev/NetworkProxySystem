@@ -4,6 +4,10 @@ import com.networkproxy.https.ConnectRequest;
 import com.networkproxy.https.ConnectRequestParser;
 import com.networkproxy.https.HttpsException;
 import com.networkproxy.https.HttpsTunnelManager;
+import com.networkproxy.logging.ConnectionLog;
+import com.networkproxy.logging.ConnectionLogger;
+import com.networkproxy.security.AccessControlService;
+import com.networkproxy.security.AccessRule;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,13 +22,25 @@ public class HttpsHandler implements ProtocolHandler {
     private final ConnectRequestParser parser;
     private final HttpsTunnelManager tunnelManager;
     private final boolean enabled;
+    private final AccessControlService accessControlService;
+    private final ConnectionLogger connectionLogger;
 
     public HttpsHandler(ConnectRequestParser parser,
                         HttpsTunnelManager tunnelManager,
                         boolean enabled) {
+        this(parser, tunnelManager, enabled, null, null);
+    }
+
+    public HttpsHandler(ConnectRequestParser parser,
+                        HttpsTunnelManager tunnelManager,
+                        boolean enabled,
+                        AccessControlService accessControlService,
+                        ConnectionLogger connectionLogger) {
         this.parser = parser;
         this.tunnelManager = tunnelManager;
         this.enabled = enabled;
+        this.accessControlService = accessControlService;
+        this.connectionLogger = connectionLogger;
     }
 
     @Override
@@ -53,17 +69,48 @@ public class HttpsHandler implements ProtocolHandler {
                 throw new HttpsException(400, "Invalid CONNECT request");
             }
             ConnectRequest request = parser.parse(lines[0]);
+            AccessControlService.AccessRequest accessRequest = null;
+            AccessControlService.AccessDecision decision = null;
+            if (accessControlService != null) {
+                accessRequest = new AccessControlService.AccessRequest(
+                        clientSocket.getInetAddress().getHostAddress(),
+                        request.host(),
+                        isIpLiteral(request.host()) ? request.host() : null,
+                        request.port(),
+                        "HTTPS");
+                decision = accessControlService.decide(accessRequest);
+                if (decision.action() == AccessRule.Action.BLOCK) {
+                    if (connectionLogger != null) {
+                        connectionLogger.log(
+                                accessRequest,
+                                decision,
+                                ConnectionLog.ExecutionStatus.BLOCKED,
+                                null);
+                    }
+                    sendError(output, 403, "Forbidden");
+                    return;
+                }
+            }
             Socket upstream;
             try {
                 upstream = tunnelManager.connect(request);
             } catch (HttpsException e) {
+                logError(accessRequest, decision, "HTTPS tunnel setup failed");
                 throw e;
             } catch (IOException e) {
+                logError(accessRequest, decision, "HTTPS tunnel setup failed");
                 sendError(output, 502, "Unable to connect to destination");
                 return;
             }
             try (upstream) {
                 writeEstablished(output);
+                if (accessControlService != null && connectionLogger != null) {
+                    connectionLogger.log(
+                            accessRequest,
+                            decision,
+                            ConnectionLog.ExecutionStatus.CONNECTED,
+                            null);
+                }
                 try {
                     tunnelManager.relay(clientSocket, upstream);
                 } catch (InterruptedException e) {
@@ -110,6 +157,44 @@ public class HttpsHandler implements ProtocolHandler {
                 + "Proxy-Agent: NetworkProxySystem\r\n\r\n")
                 .getBytes(StandardCharsets.ISO_8859_1));
         output.flush();
+    }
+
+    private void logError(
+            AccessControlService.AccessRequest request,
+            AccessControlService.AccessDecision decision,
+            String errorMessage
+    ) {
+        if (connectionLogger != null && request != null && decision != null) {
+            connectionLogger.log(
+                    request,
+                    decision,
+                    ConnectionLog.ExecutionStatus.ERROR,
+                    errorMessage);
+        }
+    }
+
+    private boolean isIpLiteral(String host) {
+        if (host == null) {
+            return false;
+        }
+        if (host.indexOf(':') >= 0) {
+            return true;
+        }
+        String[] parts = host.split("\\.", -1);
+        if (parts.length != 4) {
+            return false;
+        }
+        try {
+            for (String part : parts) {
+                int value = Integer.parseInt(part);
+                if (value < 0 || value > 255) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private void sendError(OutputStream output, int status, String message)

@@ -1,7 +1,12 @@
 package com.networkproxy.core;
 
 import com.networkproxy.config.ProxyConfig;
+import com.networkproxy.logging.ConnectionLogger;
 import com.networkproxy.network.SocketManager;
+import com.networkproxy.security.AccessControlService;
+import com.networkproxy.security.RuleManager;
+import java.sql.SQLException;
+import java.util.List;
 
 import java.net.Socket;
 import java.util.Set;
@@ -19,10 +24,21 @@ public class ConnectionManager {
 
     private final SocketManager socketManager;
     private final ProxyConfig config;
+    private final AccessControlService accessControlService;
+    private final ConnectionLogger connectionLogger;
 
     public ConnectionManager(ProxyConfig config) {
+        this(config, createFallbackAccessControl(), createFallbackLogger());
+    }
 
+    public ConnectionManager(
+            ProxyConfig config,
+            AccessControlService accessControlService,
+            ConnectionLogger connectionLogger
+    ) {
         this.config = config;
+        this.accessControlService = accessControlService;
+        this.connectionLogger = connectionLogger;
         this.executorService = Executors.newFixedThreadPool(
                 config.getMaxThreads()
         );
@@ -42,7 +58,9 @@ public class ConnectionManager {
                             clientSocket,
                             this,
                             clientTimeout,
-                            config
+                            config,
+                            accessControlService,
+                            connectionLogger
                     )
             );
 
@@ -82,5 +100,17 @@ public class ConnectionManager {
         executorService.shutdownNow();
 
         System.out.println("ConnectionManager da dung.");
+    }
+
+    private static AccessControlService createFallbackAccessControl() {
+        try {
+            return new AccessControlService(new RuleManager(List::of));
+        } catch (SQLException e) {
+            throw new IllegalStateException("Unable to initialize access control", e);
+        }
+    }
+
+    private static ConnectionLogger createFallbackLogger() {
+        return new ConnectionLogger(log -> { });
     }
 }

@@ -12,6 +12,11 @@ import com.networkproxy.https.HttpsConnectionConfig;
 import com.networkproxy.https.HttpsTunnelManager;
 import com.networkproxy.network.DataRelay;
 import com.networkproxy.config.ProxyConfig;
+import com.networkproxy.logging.ConnectionLogger;
+import com.networkproxy.security.AccessControlService;
+import com.networkproxy.security.RuleManager;
+import java.sql.SQLException;
+import java.util.List;
 
 public class ClientHandler implements Runnable {
 
@@ -35,12 +40,25 @@ public class ClientHandler implements Runnable {
             int clientTimeout,
             ProxyConfig config
     ) {
+        this(clientSocket, connectionManager, clientTimeout, config,
+                createFallbackAccessControl(), createFallbackLogger());
+    }
 
+    public ClientHandler(
+            Socket clientSocket,
+            ConnectionManager connectionManager,
+            int clientTimeout,
+            ProxyConfig config,
+            AccessControlService accessControlService,
+            ConnectionLogger connectionLogger
+    ) {
         this.clientSocket = clientSocket;
         this.connectionManager = connectionManager;
         this.clientTimeout = clientTimeout;
         this.dispatcher = new HandlerDispatcher();
-        dispatcher.register(HandlerDispatcher.Protocol.HTTP, new HttpHandler());
+        dispatcher.register(
+                HandlerDispatcher.Protocol.HTTP,
+                new HttpHandler(accessControlService, connectionLogger));
         dispatcher.register(
                 HandlerDispatcher.Protocol.HTTPS,
                 new HttpsHandler(
@@ -52,7 +70,9 @@ public class ClientHandler implements Runnable {
                                         java.util.Set.of(443),
                                         config.isHttpsAllowPrivateDestinations()),
                                 new DataRelay()),
-                        config.isHttpsEnabled()));
+                        config.isHttpsEnabled(),
+                        accessControlService,
+                        connectionLogger));
     }
 
     @Override
@@ -118,5 +138,17 @@ public class ClientHandler implements Runnable {
             line.append((char) value);
         }
         return line.length() == 0 ? null : line.toString();
+    }
+
+    private static AccessControlService createFallbackAccessControl() {
+        try {
+            return new AccessControlService(new RuleManager(List::of));
+        } catch (SQLException e) {
+            throw new IllegalStateException("Unable to initialize access control", e);
+        }
+    }
+
+    private static ConnectionLogger createFallbackLogger() {
+        return new ConnectionLogger(log -> { });
     }
 }
