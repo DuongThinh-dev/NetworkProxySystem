@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Logs | Network Proxy Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="app-main">
+        <header class="topbar" id="topbar"></header>
+        <main class="page">
+            <div class="page-header">
+                <div>
+                    <h1>Connection Logs</h1>
+                    <p class="page-subtitle">Tra cứu lịch sử kết nối và quyết định của proxy.</p>
+                </div>
+            </div>
+
+            <section class="card">
+                <form class="filter-bar" id="log-filters">
+                    <input class="input" type="search" id="log-client-ip" placeholder="Client IP">
+                    <input class="input" type="search" id="log-target" placeholder="Target">
+                    <select class="select" id="log-protocol" aria-label="Protocol">
+                        <option value="">Protocol</option>
+                        <option value="HTTP">HTTP</option>
+                        <option value="HTTPS">HTTPS</option>
+                        <option value="SSH">SSH</option>
+                    </select>
+                    <select class="select" id="log-decision" aria-label="Decision">
+                        <option value="">Decision</option>
+                        <option value="ALLOW">ALLOW</option>
+                        <option value="BLOCK">BLOCK</option>
+                    </select>
+                    <select class="select" id="log-status" aria-label="Execution status">
+                        <option value="">Trạng thái</option>
+                        <option value="CONNECTED">CONNECTED</option>
+                        <option value="BLOCKED">BLOCKED</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>
+                    <input class="input" type="date" id="log-from" aria-label="Từ ngày">
+                    <input class="input" type="date" id="log-to" aria-label="Đến ngày">
+                    <button class="btn btn-secondary" type="submit">Lọc</button>
+                    <button class="btn btn-ghost" type="button" id="reset-log-filters">Xóa lọc</button>
+                </form>
+
+                <div class="table-wrap" id="logs-table">
+                    <div class="table-empty">Đang tải log kết nối...</div>
+                </div>
+                <div class="pagination" id="logs-pagination"></div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root" class="toast-stack" aria-live="polite"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/layout.js"></script>
+<script src="../js/logs.js"></script>
+</body>
+</html>

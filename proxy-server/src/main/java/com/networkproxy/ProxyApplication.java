@@ -1,9 +1,11 @@
 package com.networkproxy;
 
+import com.networkproxy.config.ControlConfig;
+import com.networkproxy.config.DatabaseConfig;
 import com.networkproxy.config.ProxyConfig;
+import com.networkproxy.control.ProxyControlServer;
 import com.networkproxy.core.ConnectionManager;
 import com.networkproxy.core.ProxyServer;
-import com.networkproxy.config.DatabaseConfig;
 import com.networkproxy.logging.ConnectionLogger;
 import com.networkproxy.repository.LogRepository;
 import com.networkproxy.repository.RuleRepository;
@@ -23,16 +25,21 @@ public class ProxyApplication {
         Properties properties = loadProperties();
         ProxyConfig config = loadConfig(properties);
         DatabaseConfig databaseConfig = DatabaseConfig.from(properties);
+        ControlConfig controlConfig = ControlConfig.from(properties);
 
+        RuleManager ruleManager;
         AccessControlService accessControlService;
         ConnectionLogger connectionLogger;
         try {
-            RuleManager ruleManager = databaseConfig.enabled()
+            ruleManager = databaseConfig.enabled()
                     ? new RuleManager(new RuleRepository(databaseConfig))
                     : new RuleManager(List::of);
             accessControlService = new AccessControlService(ruleManager);
-            connectionLogger = new ConnectionLogger(
-                    new LogRepository(databaseConfig));
+
+            // Khi database tắt, dùng no-op logger thay vì cố ghi log vào DB.
+            connectionLogger = databaseConfig.enabled()
+                    ? new ConnectionLogger(new LogRepository(databaseConfig))
+                    : new ConnectionLogger(log -> { });
         } catch (Exception e) {
             throw new IllegalStateException(
                     "Khong the khoi tao Access Control va Logging", e);
@@ -41,41 +48,62 @@ public class ProxyApplication {
         ConnectionManager connectionManager =
                 new ConnectionManager(config, accessControlService, connectionLogger);
 
-        // 3. Khởi tạo ProxyServer
         ProxyServer proxyServer =
                 new ProxyServer(config, connectionManager);
 
-        // 4. Đăng ký xử lý khi chương trình bị dừng
+        ProxyControlServer controlServer = startControlServer(
+                controlConfig, ruleManager, connectionManager);
+
         Runtime.getRuntime().addShutdownHook(
                 new Thread(() -> {
-
-                    System.out.println(
-                            "\nDang tat Proxy Server..."
-                    );
-
+                    System.out.println("\nDang tat Proxy Server...");
                     proxyServer.stop();
-
+                    if (controlServer != null) {
+                        controlServer.close();
+                    }
                     connectionManager.shutdown();
                 })
         );
 
-        // 5. Khởi động Proxy Server
         try {
-
             proxyServer.start();
-
         } catch (Exception e) {
-
             System.err.println(
-                    "Khong the khoi dong Proxy Server: "
-                            + e.getMessage()
-            );
-
+                    "Khong the khoi dong Proxy Server: " + e.getMessage());
         } finally {
-
             proxyServer.stop();
-
+            if (controlServer != null) {
+                controlServer.close();
+            }
             connectionManager.shutdown();
+        }
+    }
+
+    private static ProxyControlServer startControlServer(
+            ControlConfig controlConfig,
+            RuleManager ruleManager,
+            ConnectionManager connectionManager
+    ) {
+        if (!controlConfig.enabled()) {
+            System.out.println("Proxy Control API: disabled");
+            return null;
+        }
+
+        try {
+            ProxyControlServer controlServer = new ProxyControlServer(
+                    controlConfig.host(),
+                    controlConfig.port(),
+                    controlConfig.token(),
+                    ruleManager,
+                    connectionManager);
+            controlServer.start();
+            System.out.println("Proxy Control API: http://"
+                    + controlConfig.host() + ":" + controlConfig.port());
+            return controlServer;
+        } catch (Exception e) {
+            System.err.println(
+                    "Khong the khoi dong Proxy Control API: " + e.getMessage());
+            return null;
         }
     }
 

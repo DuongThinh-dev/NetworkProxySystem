@@ -51,3 +51,27 @@ BEGIN
         ON dbo.ConnectionLogs (Decision, OccurredAt DESC);
 END;
 GO
+
+IF NOT EXISTS
+(
+    SELECT 1 FROM sys.indexes
+    WHERE name = N'IX_AdminAuditLogs_CreatedAt'
+      AND object_id = OBJECT_ID(N'dbo.AdminAuditLogs')
+)
+BEGIN
+    CREATE INDEX IX_AdminAuditLogs_CreatedAt
+        ON dbo.AdminAuditLogs (CreatedAt DESC, AuditId DESC);
+END;
+GO
+
+IF NOT EXISTS
+(
+    SELECT 1 FROM sys.indexes
+    WHERE name = N'IX_AdminAuditLogs_UserId_CreatedAt'
+      AND object_id = OBJECT_ID(N'dbo.AdminAuditLogs')
+)
+BEGIN
+    CREATE INDEX IX_AdminAuditLogs_UserId_CreatedAt
+        ON dbo.AdminAuditLogs (UserId, CreatedAt DESC);
+END;
+GO

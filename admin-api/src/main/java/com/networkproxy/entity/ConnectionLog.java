@@ -1,5 +1,18 @@
-package main.java.com.networkproxy.entity;
+package com.networkproxy.entity;
 
-public class ConnectionLog {
-    
+import java.time.LocalDateTime;
+
+public record ConnectionLog(
+        long id,
+        LocalDateTime occurredAt,
+        String clientIp,
+        String target,
+        int targetPort,
+        String protocol,
+        String decision,
+        Long matchedRuleId,
+        String reasonCode,
+        String executionStatus,
+        String errorMessage
+) {
 }

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng quan | Network Proxy Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="app-main">
+        <header class="topbar" id="topbar"></header>
+        <main class="page">
+            <div class="page-header">
+                <div>
+                    <h1>Tổng quan</h1>
+                    <p class="page-subtitle">Theo dõi hoạt động của proxy và các quy tắc truy cập.</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary" type="button" id="refresh-dashboard">Làm mới</button>
+                </div>
+            </div>
+
+            <section class="stat-grid" id="stat-grid" aria-label="Thống kê tổng quan">
+                <div class="stat-card stat-card--blue">
+                    <div class="stat-top"><span class="stat-label">Đang tải...</span></div>
+                    <div class="stat-value skeleton" style="width: 80px; height: 32px;"></div>
+                </div>
+                <div class="stat-card stat-card--violet">
+                    <div class="stat-top"><span class="stat-label">Đang tải...</span></div>
+                    <div class="stat-value skeleton" style="width: 80px; height: 32px;"></div>
+                </div>
+                <div class="stat-card stat-card--red">
+                    <div class="stat-top"><span class="stat-label">Đang tải...</span></div>
+                    <div class="stat-value skeleton" style="width: 80px; height: 32px;"></div>
+                </div>
+                <div class="stat-card stat-card--green">
+                    <div class="stat-top"><span class="stat-label">Đang tải...</span></div>
+                    <div class="stat-value skeleton" style="width: 80px; height: 32px;"></div>
+                </div>
+            </section>
+
+            <section class="content-grid">
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Quyết định truy cập</h2>
+                            <p>Phân bố ALLOW / BLOCK / ERROR trong toàn bộ log.</p>
+                        </div>
+                    </div>
+                    <div class="decision-chart" id="decision-chart">
+                        <div class="empty-state">Đang tải dữ liệu...</div>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Proxy control</h2>
+                            <p>Kết nối tới proxy-server qua control API.</p>
+                        </div>
+                        <span class="badge badge--neutral" id="proxy-status-badge">Đang kiểm tra</span>
+                    </div>
+                    <div class="proxy-status" id="proxy-status">
+                        <div class="empty-state">Đang kiểm tra kết nối...</div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-grid content-grid--wide">
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Top target</h2>
+                            <p>5 target được truy cập nhiều nhất.</p>
+                        </div>
+                    </div>
+                    <div class="top-target-list" id="top-targets">
+                        <div class="empty-state">Đang tải dữ liệu...</div>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Hoạt động quản trị gần đây</h2>
+                            <p>5 thao tác mới nhất trên Admin Console.</p>
+                        </div>
+                        <a class="link" href="audit-logs.html">Xem tất cả</a>
+                    </div>
+                    <div class="activity-list" id="recent-audit">
+                        <div class="empty-state">Đang tải dữ liệu...</div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <div>
+                        <h2>Kết nối gần đây</h2>
+                        <p>8 bản ghi mới nhất từ ConnectionLogs.</p>
+                    </div>
+                    <a class="link" href="connection-logs.html">Xem tất cả</a>
+                </div>
+                <div class="table-wrap" id="recent-logs">
+                    <div class="table-empty">Đang tải dữ liệu...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root" class="toast-stack" aria-live="polite"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/layout.js"></script>
+<script src="../js/dashboard.js"></script>
+</body>
+</html>

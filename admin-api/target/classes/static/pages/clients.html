@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients | Network Proxy Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="app-main">
+        <header class="topbar" id="topbar"></header>
+        <main class="page">
+            <div class="page-header">
+                <div>
+                    <h1>Clients</h1>
+                    <p class="page-subtitle">Tổng hợp lưu lượng theo địa chỉ IP client.</p>
+                </div>
+            </div>
+
+            <section class="card">
+                <form class="filter-bar" id="client-filters">
+                    <input class="input input--grow" type="search" id="client-search"
+                           placeholder="Tìm theo địa chỉ IP...">
+                    <button class="btn btn-secondary" type="submit">Lọc</button>
+                    <button class="btn btn-ghost" type="button" id="reset-client-filters">Xóa lọc</button>
+                </form>
+
+                <div class="table-wrap" id="clients-table">
+                    <div class="table-empty">Đang tải danh sách client...</div>
+                </div>
+                <div class="pagination" id="clients-pagination"></div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root" class="toast-stack" aria-live="polite"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/layout.js"></script>
+<script src="../js/clients.js"></script>
+</body>
+</html>

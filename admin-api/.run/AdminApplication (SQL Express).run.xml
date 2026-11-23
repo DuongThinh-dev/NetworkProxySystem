@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="AdminApplication (SQL Express)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.networkproxy.AdminApplication" />
+    <module name="admin-api" />
+    <option name="VM_PARAMETERS" value="-Djava.library.path=C:\Users\ADMIN\AppData\Local\Temp\opencode\mssql-auth --enable-native-access=ALL-UNNAMED" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <envs>
+      <env name="NETWORK_PROXY_DB_URL" value="jdbc:sqlserver://localhost\SQLEXPRESS;databaseName=NetworkProxyDB;integratedSecurity=true;encrypt=true;trustServerCertificate=true;loginTimeout=10" />
+      <env name="NETWORK_PROXY_DB_USERNAME" value="" />
+      <env name="NETWORK_PROXY_DB_PASSWORD" value="" />
+      <env name="PROXY_CONTROL_ENABLED" value="true" />
+      <env name="PROXY_CONTROL_URL" value="http://127.0.0.1:8082" />
+      <env name="PROXY_CONTROL_TOKEN" value="dev-token-change-me" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

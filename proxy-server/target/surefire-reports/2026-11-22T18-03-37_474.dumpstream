@@ -1,0 +1,5 @@
+# Created at 2026-11-22T18:03:39.804
+Boot Manifest-JAR contains absolute paths in classpath 'E:\MangMayTinh\NetworkProxySystem\proxy-server\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+

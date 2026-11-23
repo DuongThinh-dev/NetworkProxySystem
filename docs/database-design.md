@@ -80,17 +80,23 @@ key. Nhật ký chỉ mô tả metadata kết nối và kết quả xử lý.
 
 ## 5. Ánh xạ schema SQL Server
 
-Các script trong `database/` tạo database `NetworkProxyDB` với hai bảng:
+Các script trong `database/` tạo database `NetworkProxyDB` với bốn bảng:
 
 - `AccessRules`: điều kiện luật, hành động, mức ưu tiên, trạng thái bật/tắt,
   thời điểm tạo và cập nhật.
 - `ConnectionLogs`: metadata kết nối, quyết định, luật khớp, mã lý do, trạng
   thái thực thi và lỗi upstream đã làm sạch.
+- `AdminUsers`: tài khoản quản trị, mật khẩu BCrypt, tên hiển thị, trạng thái
+  hoạt động và lần đăng nhập cuối.
+- `AdminAuditLogs`: nhật ký thao tác quản trị, tham chiếu `AdminUsers.UserId`
+  (nullable, `ON DELETE SET NULL`), hành động, loại đối tượng, mã đối tượng và
+  chi tiết.
 
 `ConnectionLogs.MatchedRuleId` tham chiếu `AccessRules.RuleId`; khi xóa luật,
-log lịch sử vẫn được giữ và mã luật được đặt thành `NULL`. Các thời điểm được
-lưu theo UTC. Index hỗ trợ nạp luật đang bật và truy vấn log mới nhất, theo
-client hoặc theo quyết định.
+log lịch sử vẫn được giữ và mã luật được đặt thành `NULL`. `AdminAuditLogs.UserId`
+tham chiếu `AdminUsers.UserId`; khi xóa tài khoản, audit log vẫn được giữ với
+`UserId = NULL`. Các thời điểm được lưu theo UTC. Index hỗ trợ nạp luật đang bật,
+truy vấn log mới nhất theo client/quyết định và tra cứu audit log gần đây.
 
 Chạy script theo thứ tự: `create-database.sql`, `create-tables.sql`,
 `indexes.sql`, rồi tùy chọn `insert-sample-data.sql`.
@@ -103,6 +109,14 @@ các biến môi trường `NETWORK_PROXY_DB_URL`, `NETWORK_PROXY_DB_USERNAME`,
 `NETWORK_PROXY_DB_PASSWORD`, `NETWORK_PROXY_DB_ENABLED`. Biến môi trường được
 ưu tiên. Kết nối DB tắt mặc định trong cấu hình mẫu; khi bật, đặt URL, username
 và password phù hợp với SQL Server đang chạy. Mật khẩu không nên commit vào Git.
+
+Nếu JDBC URL chứa `integratedSecurity=true`, driver dùng danh tính Windows của
+tiến trình Java và không cần username/password. Trường hợp này cần native auth
+DLL (`mssql-jdbc_auth-13.6.0.x64.dll`) nằm trong `java.library.path`.
+
+`admin-api` dùng Spring JDBC + HikariCP và cùng bộ biến môi trường
+`NETWORK_PROXY_DB_*`. Khi bảng `AdminUsers` rỗng, Admin API seed tài khoản quản
+trị mặc định; nếu đã có dữ liệu thì không seed lại. Mật khẩu được băm bằng BCrypt.
 
 `RuleRepository` chỉ tải luật đang bật; `LogRepository` ghi metadata vào bảng
 log bằng prepared statement. Mỗi thao tác hiện mở và đóng một JDBC connection.

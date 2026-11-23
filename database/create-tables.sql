@@ -61,3 +61,47 @@ BEGIN
     );
 END;
 GO
+
+-- Tài khoản quản trị cho Admin API (Phase 6).
+IF OBJECT_ID(N'dbo.AdminUsers', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.AdminUsers
+    (
+        UserId       BIGINT IDENTITY(1,1) NOT NULL,
+        Username     NVARCHAR(64) NOT NULL,
+        PasswordHash NVARCHAR(100) NOT NULL,
+        DisplayName  NVARCHAR(128) NULL,
+        IsEnabled    BIT NOT NULL
+                         CONSTRAINT DF_AdminUsers_IsEnabled DEFAULT (1),
+        CreatedAt    DATETIME2(3) NOT NULL
+                         CONSTRAINT DF_AdminUsers_CreatedAt DEFAULT (SYSUTCDATETIME()),
+        LastLoginAt  DATETIME2(3) NULL,
+
+        CONSTRAINT PK_AdminUsers PRIMARY KEY (UserId),
+        CONSTRAINT UQ_AdminUsers_Username UNIQUE (Username)
+    );
+END;
+GO
+
+-- Nhật ký thao tác quản trị (thêm/sửa/xóa rule, đăng nhập...).
+IF OBJECT_ID(N'dbo.AdminAuditLogs', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.AdminAuditLogs
+    (
+        AuditId    BIGINT IDENTITY(1,1) NOT NULL,
+        UserId     BIGINT NULL,
+        Username   NVARCHAR(64) NULL,
+        Action     NVARCHAR(32) NOT NULL,
+        EntityType NVARCHAR(32) NOT NULL,
+        EntityId   BIGINT NULL,
+        Details    NVARCHAR(1000) NULL,
+        CreatedAt  DATETIME2(3) NOT NULL
+                       CONSTRAINT DF_AdminAuditLogs_CreatedAt DEFAULT (SYSUTCDATETIME()),
+
+        CONSTRAINT PK_AdminAuditLogs PRIMARY KEY (AuditId),
+        CONSTRAINT FK_AdminAuditLogs_AdminUsers
+            FOREIGN KEY (UserId) REFERENCES dbo.AdminUsers (UserId)
+            ON DELETE SET NULL
+    );
+END;
+GO

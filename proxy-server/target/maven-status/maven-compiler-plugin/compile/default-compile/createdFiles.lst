@@ -1,3 +1,4 @@
+com\networkproxy\config\ControlConfig.class
 com\networkproxy\ssh\SshAuthenticationException.class
 com\networkproxy\ssh\SshConnection.class
 com\networkproxy\https\ConnectRequest.class
@@ -15,6 +16,7 @@ com\networkproxy\ProxyApplication.class
 com\networkproxy\repository\RuleRepository.class
 com\networkproxy\repository\SqlServerConnectionFactory.class
 com\networkproxy\handler\HandlerDispatcher$Protocol.class
+com\networkproxy\control\ProxyControlServer.class
 com\networkproxy\ssh\SshAuthenticationProvider.class
 com\networkproxy\security\AccessControlService$AccessRequest.class
 com\networkproxy\config\ProxyConfig.class

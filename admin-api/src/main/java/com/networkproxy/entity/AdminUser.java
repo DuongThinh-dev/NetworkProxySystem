@@ -1,5 +1,14 @@
-package main.java.com.networkproxy.entity;
+package com.networkproxy.entity;
 
-public class AdminUser {
-    
+import java.time.LocalDateTime;
+
+public record AdminUser(
+        long userId,
+        String username,
+        String passwordHash,
+        String displayName,
+        boolean enabled,
+        LocalDateTime createdAt,
+        LocalDateTime lastLoginAt
+) {
 }

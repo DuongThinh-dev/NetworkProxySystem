@@ -1,0 +1,407 @@
+/* ------------------------------------------------------------------ */
+/* Dashboard                                                           */
+/* ------------------------------------------------------------------ */
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.stat-card {
+    position: relative;
+    overflow: hidden;
+    padding: 18px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(21, 26, 37, 0.94), rgba(17, 21, 31, 0.94));
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-card::after {
+    position: absolute;
+    top: -42px;
+    right: -32px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--stat-glow, rgba(91, 140, 255, 0.09));
+    content: "";
+    filter: blur(2px);
+}
+
+.stat-top {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.stat-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--stat-bg, var(--primary-soft));
+    color: var(--stat-color, var(--primary));
+    font-size: 16px;
+}
+
+.stat-value {
+    margin-bottom: 5px;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+}
+
+.stat-hint {
+    color: var(--text-dim);
+    font-size: 11.5px;
+}
+
+.stat-hint strong {
+    color: var(--stat-color, var(--primary));
+    font-weight: 600;
+}
+
+.stat-card--blue {
+    --stat-color: var(--primary);
+    --stat-bg: var(--primary-soft);
+    --stat-glow: rgba(91, 140, 255, 0.1);
+}
+
+.stat-card--violet {
+    --stat-color: var(--violet);
+    --stat-bg: var(--violet-soft);
+    --stat-glow: rgba(167, 139, 250, 0.1);
+}
+
+.stat-card--red {
+    --stat-color: var(--danger);
+    --stat-bg: var(--danger-soft);
+    --stat-glow: rgba(255, 92, 122, 0.1);
+}
+
+.stat-card--green {
+    --stat-color: var(--success);
+    --stat-bg: var(--success-soft);
+    --stat-glow: rgba(45, 212, 167, 0.1);
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.content-grid--wide {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+
+.dashboard-card {
+    min-height: 100%;
+}
+
+/* Decision chart ---------------------------------------------------- */
+
+.decision-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+}
+
+.decision-row {
+    display: grid;
+    grid-template-columns: 74px minmax(0, 1fr) 58px;
+    gap: 12px;
+    align-items: center;
+}
+
+.decision-label {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.decision-track {
+    height: 9px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(139, 149, 168, 0.09);
+}
+
+.decision-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--fill, var(--primary));
+    transition: width 0.5s ease;
+}
+
+.decision-fill--allow {
+    background: linear-gradient(90deg, #1fb88e, var(--success));
+}
+
+.decision-fill--block {
+    background: linear-gradient(90deg, #e64a68, var(--danger));
+}
+
+.decision-fill--error {
+    background: linear-gradient(90deg, #d99a2f, var(--warning));
+}
+
+.decision-value {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+}
+
+.decision-total {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-top: 4px;
+    border-top: 1px solid var(--border-soft);
+    color: var(--text-dim);
+    font-size: 11.5px;
+}
+
+.decision-total strong {
+    color: var(--text);
+    font-size: 14px;
+}
+
+/* Proxy status ------------------------------------------------------ */
+
+.proxy-status {
+    padding: 20px;
+}
+
+.proxy-status-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: rgba(139, 149, 168, 0.035);
+}
+
+.proxy-dot {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    border-radius: 50%;
+    background: var(--text-dim);
+}
+
+.proxy-dot--online {
+    background: var(--success);
+    box-shadow: 0 0 0 5px rgba(45, 212, 167, 0.1);
+}
+
+.proxy-dot--offline {
+    background: var(--danger);
+    box-shadow: 0 0 0 5px rgba(255, 92, 122, 0.1);
+}
+
+.proxy-status-title {
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.proxy-status-message {
+    color: var(--text-muted);
+    font-size: 11.5px;
+}
+
+.proxy-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.proxy-metric {
+    padding: 11px 12px;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: rgba(139, 149, 168, 0.025);
+}
+
+.proxy-metric-value {
+    margin-bottom: 2px;
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.proxy-metric-label {
+    color: var(--text-dim);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.proxy-note {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    color: var(--text-dim);
+    font-size: 11px;
+}
+
+/* Top targets ------------------------------------------------------- */
+
+.top-target-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+}
+
+.top-target-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 48px;
+    gap: 7px 12px;
+    align-items: center;
+}
+
+.top-target-name {
+    overflow: hidden;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.top-target-count {
+    color: var(--text-muted);
+    font-size: 11.5px;
+    text-align: right;
+}
+
+.top-target-track {
+    grid-column: 1 / -1;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(139, 149, 168, 0.08);
+}
+
+.top-target-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, rgba(91, 140, 255, 0.55), var(--primary));
+}
+
+/* Recent audit ------------------------------------------------------ */
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 20px 14px;
+}
+
+.activity-item {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.activity-item:last-child {
+    border-bottom: 0;
+}
+
+.activity-icon {
+    display: grid;
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 12px;
+}
+
+.activity-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.activity-title {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.activity-meta {
+    color: var(--text-dim);
+    font-size: 10.5px;
+}
+
+/* Recent logs ------------------------------------------------------- */
+
+.recent-logs-table td:first-child {
+    color: var(--text-dim);
+    font-size: 11px;
+}
+
+.recent-logs-table .cell-target {
+    max-width: 200px;
+}
+
+/* Dashboard responsive --------------------------------------------- */
+
+@media (max-width: 1200px) {
+    .stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .content-grid,
+    .content-grid--wide {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .decision-row {
+        grid-template-columns: 62px minmax(0, 1fr) 48px;
+    }
+
+    .proxy-metrics {
+        grid-template-columns: 1fr;
+    }
+}
