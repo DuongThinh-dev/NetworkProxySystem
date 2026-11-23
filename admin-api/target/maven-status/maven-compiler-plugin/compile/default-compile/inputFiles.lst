@@ -1,4 +1,4 @@
-E:\MangMayTinh\NetworkProxySystem\admin-api\src\main\java\com\networkproxy\AdminApplication.java
+E:\MangMayTinh\NetworkProxySystem\admin-api\src\main\java\com\networkproxy\admin\AdminApplication.java
 E:\MangMayTinh\NetworkProxySystem\admin-api\src\main\java\com\networkproxy\auth\AdminPrincipal.java
 E:\MangMayTinh\NetworkProxySystem\admin-api\src\main\java\com\networkproxy\auth\AuthInterceptor.java
 E:\MangMayTinh\NetworkProxySystem\admin-api\src\main\java\com\networkproxy\config\AdminProperties.java
