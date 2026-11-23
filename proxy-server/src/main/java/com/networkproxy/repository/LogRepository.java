@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public final class LogRepository implements ConnectionLogWriter {
 
     private static final String INSERT_SQL = """
-            INSERT INTO dbo.ConnectionLogs
+            INSERT INTO ConnectionLogs
                 (OccurredAt, ClientIp, Target, TargetPort, Protocol, Decision,
                  MatchedRuleId, ReasonCode, ExecutionStatus, ErrorMessage)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)

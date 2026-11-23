@@ -18,7 +18,7 @@ public class AuditLogRepository {
     private static final String SELECT = """
             SELECT AuditId, UserId, Username, Action, EntityType,
                    EntityId, Details, CreatedAt
-            FROM dbo.AdminAuditLogs
+            FROM AdminAuditLogs
             """;
 
     private static final RowMapper<AuditLog> MAPPER = (rs, rowNum) ->
@@ -47,7 +47,7 @@ public class AuditLogRepository {
             String details
     ) {
         jdbc.update("""
-                        INSERT INTO dbo.AdminAuditLogs
+                        INSERT INTO AdminAuditLogs
                             (UserId, Username, Action, EntityType, EntityId, Details)
                         VALUES
                             (:userId, :username, :action, :entityType, :entityId, :details)
@@ -63,7 +63,7 @@ public class AuditLogRepository {
 
     public PageResponse<AuditLog> findPage(int page, int size) {
         Long totalValue = jdbc.queryForObject(
-                "SELECT COUNT_BIG(*) FROM dbo.AdminAuditLogs",
+                "SELECT COUNT(*) FROM AdminAuditLogs",
                 new MapSqlParameterSource(),
                 Long.class);
         long total = totalValue == null ? 0 : totalValue;
@@ -73,7 +73,7 @@ public class AuditLogRepository {
                 .addValue("size", size);
         List<AuditLog> content = jdbc.query(
                 SELECT + " ORDER BY CreatedAt DESC, AuditId DESC"
-                        + " OFFSET :offset ROWS FETCH NEXT :size ROWS ONLY",
+                        + " LIMIT :size OFFSET :offset",
                 params,
                 MAPPER);
         return PageResponse.of(content, page, size, total);
@@ -82,7 +82,7 @@ public class AuditLogRepository {
     public List<AuditLog> recent(int limit) {
         return jdbc.query(
                 SELECT + " ORDER BY CreatedAt DESC, AuditId DESC"
-                        + " OFFSET 0 ROWS FETCH NEXT :limit ROWS ONLY",
+                        + " LIMIT :limit",
                 new MapSqlParameterSource("limit", limit),
                 MAPPER);
     }

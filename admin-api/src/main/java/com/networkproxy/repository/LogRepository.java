@@ -19,7 +19,7 @@ public class LogRepository {
     private static final String SELECT = """
             SELECT LogId, OccurredAt, ClientIp, Target, TargetPort, Protocol,
                    Decision, MatchedRuleId, ReasonCode, ExecutionStatus, ErrorMessage
-            FROM dbo.ConnectionLogs
+            FROM ConnectionLogs
             """;
 
     private static final RowMapper<ConnectionLog> MAPPER = (rs, rowNum) ->
@@ -55,7 +55,7 @@ public class LogRepository {
     ) {
         QueryFilter filter = buildFilter(clientIp, target, protocol, decision,
                 executionStatus, from, to);
-        long total = count("SELECT COUNT_BIG(*) FROM dbo.ConnectionLogs"
+        long total = count("SELECT COUNT(*) FROM ConnectionLogs"
                 + filter.where(), filter.params());
 
         MapSqlParameterSource params = filter.params()
@@ -64,7 +64,7 @@ public class LogRepository {
         List<ConnectionLog> content = jdbc.query(
                 SELECT + filter.where()
                         + " ORDER BY OccurredAt DESC, LogId DESC"
-                        + " OFFSET :offset ROWS FETCH NEXT :size ROWS ONLY",
+                        + " LIMIT :size OFFSET :offset",
                 params,
                 MAPPER);
         return PageResponse.of(content, page, size, total);
@@ -80,40 +80,40 @@ public class LogRepository {
     }
 
     public long countAll() {
-        return count("SELECT COUNT_BIG(*) FROM dbo.ConnectionLogs",
+        return count("SELECT COUNT(*) FROM ConnectionLogs",
                 new MapSqlParameterSource());
     }
 
     public long countByDecision(String decision) {
-        return count("SELECT COUNT_BIG(*) FROM dbo.ConnectionLogs WHERE Decision = :decision",
+        return count("SELECT COUNT(*) FROM ConnectionLogs WHERE Decision = :decision",
                 new MapSqlParameterSource("decision", decision));
     }
 
     public long countByStatus(String executionStatus) {
-        return count("SELECT COUNT_BIG(*) FROM dbo.ConnectionLogs WHERE ExecutionStatus = :status",
+        return count("SELECT COUNT(*) FROM ConnectionLogs WHERE ExecutionStatus = :status",
                 new MapSqlParameterSource("status", executionStatus));
     }
 
     public long countSince(LocalDateTime since) {
-        return count("SELECT COUNT_BIG(*) FROM dbo.ConnectionLogs WHERE OccurredAt >= :since",
+        return count("SELECT COUNT(*) FROM ConnectionLogs WHERE OccurredAt >= :since",
                 new MapSqlParameterSource("since", Timestamp.valueOf(since)));
     }
 
     public long countDistinctClients() {
         return count("""
-                        SELECT COUNT_BIG(*)
-                        FROM (SELECT DISTINCT ClientIp FROM dbo.ConnectionLogs) clients
+                        SELECT COUNT(*)
+                        FROM (SELECT DISTINCT ClientIp FROM ConnectionLogs) clients
                         """,
                 new MapSqlParameterSource());
     }
 
     public List<TopTarget> topTargets(int limit) {
         return jdbc.query("""
-                        SELECT Target, COUNT_BIG(*) AS Total
-                        FROM dbo.ConnectionLogs
+                        SELECT Target, COUNT(*) AS Total
+                        FROM ConnectionLogs
                         GROUP BY Target
                         ORDER BY Total DESC, Target ASC
-                        OFFSET 0 ROWS FETCH NEXT :limit ROWS ONLY
+                        LIMIT :limit
                         """,
                 new MapSqlParameterSource("limit", limit),
                 (rs, rowNum) -> new TopTarget(
@@ -124,7 +124,7 @@ public class LogRepository {
     public List<ConnectionLog> recent(int limit) {
         return jdbc.query(
                 SELECT + " ORDER BY OccurredAt DESC, LogId DESC"
-                        + " OFFSET 0 ROWS FETCH NEXT :limit ROWS ONLY",
+                        + " LIMIT :limit",
                 new MapSqlParameterSource("limit", limit),
                 MAPPER);
     }

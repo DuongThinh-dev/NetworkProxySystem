@@ -14,8 +14,8 @@ public final class RuleRepository {
 
     private static final String FIND_ENABLED_SQL = """
             SELECT RuleId, ClientIp, Target, TargetPort, Protocol,
-                   [Action], Priority, IsEnabled
-            FROM dbo.AccessRules
+                   Action, Priority, IsEnabled
+            FROM AccessRules
             WHERE IsEnabled = 1
             ORDER BY Priority DESC, RuleId ASC
             """;

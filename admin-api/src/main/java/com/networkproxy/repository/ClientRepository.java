@@ -30,8 +30,8 @@ public class ClientRepository {
         }
 
         Long totalValue = jdbc.queryForObject(
-                "SELECT COUNT_BIG(*) FROM (SELECT DISTINCT ClientIp"
-                        + " FROM dbo.ConnectionLogs" + where + ") clients",
+                "SELECT COUNT(*) FROM (SELECT DISTINCT ClientIp"
+                        + " FROM ConnectionLogs" + where + ") clients",
                 params,
                 Long.class);
         long total = totalValue == null ? 0 : totalValue;
@@ -41,16 +41,16 @@ public class ClientRepository {
 
         String sql = """
                 SELECT ClientIp,
-                       COUNT_BIG(*) AS TotalRequests,
+                       COUNT(*) AS TotalRequests,
                        SUM(CASE WHEN Decision = 'ALLOW' THEN 1 ELSE 0 END) AS Allowed,
                        SUM(CASE WHEN Decision = 'BLOCK' THEN 1 ELSE 0 END) AS Blocked,
                        SUM(CASE WHEN ExecutionStatus = 'ERROR' THEN 1 ELSE 0 END) AS Errors,
                        MAX(OccurredAt) AS LastSeen
-                FROM dbo.ConnectionLogs
+                FROM ConnectionLogs
                 """ + where + """
                  GROUP BY ClientIp
                  ORDER BY LastSeen DESC, ClientIp ASC
-                 OFFSET :offset ROWS FETCH NEXT :size ROWS ONLY
+                 LIMIT :size OFFSET :offset
                 """;
 
         List<ClientSummary> content = jdbc.query(sql, params, (rs, rowNum) ->
@@ -67,8 +67,8 @@ public class ClientRepository {
 
     public long countDistinct() {
         Long value = jdbc.queryForObject("""
-                        SELECT COUNT_BIG(*)
-                        FROM (SELECT DISTINCT ClientIp FROM dbo.ConnectionLogs) clients
+                        SELECT COUNT(*)
+                        FROM (SELECT DISTINCT ClientIp FROM ConnectionLogs) clients
                         """,
                 new MapSqlParameterSource(),
                 Long.class);

@@ -20,8 +20,8 @@ public class RuleRepository {
 
     private static final String SELECT = """
             SELECT RuleId, ClientIp, Target, TargetPort, Protocol,
-                   [Action], Priority, IsEnabled, CreatedAt, UpdatedAt
-            FROM dbo.AccessRules
+                   Action, Priority, IsEnabled, CreatedAt, UpdatedAt
+            FROM AccessRules
             """;
 
     private static final RowMapper<AccessRule> MAPPER = (rs, rowNum) ->
@@ -50,7 +50,7 @@ public class RuleRepository {
             int size
     ) {
         QueryFilter filter = buildFilter(q, enabled);
-        long total = count("SELECT COUNT_BIG(*) FROM dbo.AccessRules"
+        long total = count("SELECT COUNT(*) FROM AccessRules"
                 + filter.where(), filter.params());
 
         MapSqlParameterSource params = filter.params()
@@ -59,7 +59,7 @@ public class RuleRepository {
         List<AccessRule> content = jdbc.query(
                 SELECT + filter.where()
                         + " ORDER BY Priority DESC, RuleId ASC"
-                        + " OFFSET :offset ROWS FETCH NEXT :size ROWS ONLY",
+                        + " LIMIT :size OFFSET :offset",
                 params,
                 MAPPER);
         return PageResponse.of(content, page, size, total);
@@ -78,9 +78,9 @@ public class RuleRepository {
         MapSqlParameterSource params = ruleParams(rule);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update("""
-                        INSERT INTO dbo.AccessRules
+                        INSERT INTO AccessRules
                             (ClientIp, Target, TargetPort, Protocol,
-                             [Action], Priority, IsEnabled)
+                             Action, Priority, IsEnabled)
                         VALUES
                             (:clientIp, :target, :targetPort, :protocol,
                              :action, :priority, :enabled)
@@ -100,30 +100,30 @@ public class RuleRepository {
         MapSqlParameterSource params = ruleParams(rule)
                 .addValue("id", id);
         jdbc.update("""
-                        UPDATE dbo.AccessRules
+                        UPDATE AccessRules
                         SET ClientIp = :clientIp,
                             Target = :target,
                             TargetPort = :targetPort,
                             Protocol = :protocol,
-                            [Action] = :action,
+                            Action = :action,
                             Priority = :priority,
                             IsEnabled = :enabled,
-                            UpdatedAt = SYSUTCDATETIME()
+                            UpdatedAt = UTC_TIMESTAMP(3)
                         WHERE RuleId = :id
                         """,
                 params);
     }
 
     public void delete(long id) {
-        jdbc.update("DELETE FROM dbo.AccessRules WHERE RuleId = :id",
+        jdbc.update("DELETE FROM AccessRules WHERE RuleId = :id",
                 new MapSqlParameterSource("id", id));
     }
 
     public void setEnabled(long id, boolean enabled) {
         jdbc.update("""
-                        UPDATE dbo.AccessRules
+                        UPDATE AccessRules
                         SET IsEnabled = :enabled,
-                            UpdatedAt = SYSUTCDATETIME()
+                            UpdatedAt = UTC_TIMESTAMP(3)
                         WHERE RuleId = :id
                         """,
                 new MapSqlParameterSource()
@@ -132,12 +132,12 @@ public class RuleRepository {
     }
 
     public long count() {
-        return count("SELECT COUNT_BIG(*) FROM dbo.AccessRules",
+        return count("SELECT COUNT(*) FROM AccessRules",
                 new MapSqlParameterSource());
     }
 
     public long countEnabled() {
-        return count("SELECT COUNT_BIG(*) FROM dbo.AccessRules WHERE IsEnabled = 1",
+        return count("SELECT COUNT(*) FROM AccessRules WHERE IsEnabled = 1",
                 new MapSqlParameterSource());
     }
 

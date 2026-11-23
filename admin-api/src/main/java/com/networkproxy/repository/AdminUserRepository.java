@@ -17,7 +17,7 @@ public class AdminUserRepository {
     private static final String SELECT = """
             SELECT UserId, Username, PasswordHash, DisplayName,
                    IsEnabled, CreatedAt, LastLoginAt
-            FROM dbo.AdminUsers
+            FROM AdminUsers
             """;
 
     private static final RowMapper<AdminUser> MAPPER = (rs, rowNum) ->
@@ -56,7 +56,7 @@ public class AdminUserRepository {
 
     public long count() {
         Long value = jdbc.queryForObject(
-                "SELECT COUNT_BIG(*) FROM dbo.AdminUsers",
+                "SELECT COUNT(*) FROM AdminUsers",
                 new MapSqlParameterSource(),
                 Long.class);
         return value == null ? 0 : value;
@@ -64,7 +64,7 @@ public class AdminUserRepository {
 
     public void insert(String username, String passwordHash, String displayName) {
         jdbc.update("""
-                        INSERT INTO dbo.AdminUsers
+                        INSERT INTO AdminUsers
                             (Username, PasswordHash, DisplayName)
                         VALUES
                             (:username, :passwordHash, :displayName)
@@ -77,8 +77,8 @@ public class AdminUserRepository {
 
     public void updateLastLogin(long userId) {
         jdbc.update("""
-                        UPDATE dbo.AdminUsers
-                        SET LastLoginAt = SYSUTCDATETIME()
+                        UPDATE AdminUsers
+                        SET LastLoginAt = UTC_TIMESTAMP(3)
                         WHERE UserId = :userId
                         """,
                 new MapSqlParameterSource("userId", userId));
@@ -86,7 +86,7 @@ public class AdminUserRepository {
 
     public void updatePassword(long userId, String passwordHash) {
         jdbc.update("""
-                        UPDATE dbo.AdminUsers
+                        UPDATE AdminUsers
                         SET PasswordHash = :passwordHash
                         WHERE UserId = :userId
                         """,
