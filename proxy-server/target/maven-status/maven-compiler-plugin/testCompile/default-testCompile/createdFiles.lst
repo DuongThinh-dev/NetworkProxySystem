@@ -1,8 +1,0 @@
-com\networkproxy\config\DatabaseConfigTest.class
-com\networkproxy\handler\HttpHttpsIntegrationTest.class
-com\networkproxy\ssh\SshClientConfigTest.class
-com\networkproxy\logging\ConnectionLoggerTest.class
-com\networkproxy\https\ConnectRequestParserTest.class
-com\networkproxy\security\RuleManagerTest.class
-com\networkproxy\https\HttpsTunnelManagerTest.class
-com\networkproxy\security\AccessControlServiceTest.class

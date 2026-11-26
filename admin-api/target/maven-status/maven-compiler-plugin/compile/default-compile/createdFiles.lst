@@ -18,6 +18,7 @@ com\networkproxy\repository\RuleRepository$QueryFilter.class
 com\networkproxy\service\ProxyControlClient.class
 com\networkproxy\dto\RuleResponse.class
 com\networkproxy\entity\AccessRule$Action.class
+com\networkproxy\AdminApplication.class
 com\networkproxy\dto\LoginRequest.class
 com\networkproxy\dto\PageResponse.class
 com\networkproxy\service\LogService.class
